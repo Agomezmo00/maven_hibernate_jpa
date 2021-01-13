@@ -12,13 +12,14 @@ mapped to database tables. Database driver, location, userid and pw
     
     <!-- Define a name used to get an entity manager. Define that you will 
     complete transactions with the DB  -->
-    <persistence-unit name="ad_orm" transaction-type="RESOURCE_LOCAL">
+    <persistence-unit name="gestorPersistencia" transaction-type="RESOURCE_LOCAL">
     
         <!-- Define the class for Hibernate which implements JPA -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        
         <!-- Define the object that should be persisted in the database -->
         <class>com.sanalberto.ad_orm.Customer</class>
-       <!-- <class>com.sanalberto.ad_orm.Album</class>
+        <class>com.sanalberto.ad_orm.Album</class>
         <class>com.sanalberto.ad_orm.Artist</class>
         <class>com.sanalberto.ad_orm.Employee</class>
         <class>com.sanalberto.ad_orm.Genre</class>
@@ -26,7 +27,11 @@ mapped to database tables. Database driver, location, userid and pw
         <class>com.sanalberto.ad_orm.InvoiceLine</class>
         <class>com.sanalberto.ad_orm.MediaType</class>
         <class>com.sanalberto.ad_orm.Playlist</class>
-        <class>com.sanalberto.ad_orm.Track</class> -->
+        <class>com.sanalberto.ad_orm.Track</class>
+        
+        
+        
+        
         <properties>
             <!-- Driver for DB database -->
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />

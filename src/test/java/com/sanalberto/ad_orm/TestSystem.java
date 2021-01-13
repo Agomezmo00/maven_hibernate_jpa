@@ -1,6 +1,7 @@
 package com.sanalberto.ad_orm;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -10,7 +11,11 @@ import javax.persistence.TypedQuery;
 
 public class TestSystem {
 	
-	private static EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory("ad_orm");
+	/* 
+	 * El EMF se puede crear también mediante anotaciones, 
+	 * el nombre que le pasamos es el de la persistence-unit del persistence.xml
+	 */
+	private static EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory("gestorPersistencia");
 	
 	public static void main(String[] args) {
 		
@@ -20,8 +25,11 @@ public class TestSystem {
 		//addCustomer("Agustin", "Perez", "aperez@iessanalberto.com");
 		getCustomer(1);
 		getCustomer(60);
-		getCustomers();
-		changeFirstName(3, "Aran");
+		//getCustomers();
+		//changeFirstName(3, "Aran");
+		
+		getArtist(150);
+		//getAllArtists();
 		
 		ENTITY_MANAGER_FACTORY.close();
 		
@@ -56,6 +64,9 @@ public class TestSystem {
 	
 	public static void getCustomer(int id) {
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		
+		// Las consultas están hechas con JPQL (no es SQL sino que viene de JPA)
+		// https://www.tutorialspoint.com/es/jpa/jpa_jpql.htm
 		String query = "SELECT c FROM Customer c WHERE c.customerId = :custID";
 		
 		TypedQuery<Customer> tq = em.createQuery(query, Customer.class);
@@ -75,13 +86,16 @@ public class TestSystem {
 	
 	public static void getCustomers() {
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+
+		// Las consultas están hechas con JPQL (no es SQL sino que viene de JPA)
 		String strQuery = "SELECT c FROM Customer c WHERE c.customerId IS NOT NULL";
+		String strQuerySimple = "FROM Customer";
 		
-		TypedQuery<Customer> tq = em.createQuery(strQuery, Customer.class);
+		TypedQuery<Customer> tq = em.createQuery(strQuerySimple, Customer.class);
 		List<Customer> custs;
 		try {
 			custs = tq.getResultList();
-			System.out.println("Lista customers");
+			System.out.println("Lista customers, tiene "+ custs.size() +" registros");
 			custs.forEach(cust-> System.out.println(cust.getFirstName()+" "+cust.getLastName()));
 		} catch(Exception ex) {
 			ex.printStackTrace();
@@ -142,6 +156,39 @@ public class TestSystem {
 	}
 	
 	
+	public static void getArtist(int id) {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		
+		Artist a = em.find(Artist.class, id);
+		
+		System.out.println(a.getName());
+		getArtistAlbums(a);
+		
+		em.close();
+	}
 	
-
+	public static void getArtistAlbums(Artist art) {
+		
+		Set<Album> albums = art.getAlbums();
+		
+		System.out.println("Albums del artista: ");
+		albums.forEach(album -> System.out.println(album.getTitle()));
+		
+	}
+	
+	public static void getAllArtists() {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		
+		String query= "FROM Artist";
+		TypedQuery<Artist> tq = em.createQuery(query, Artist.class);
+	
+		List<Artist>  artists = tq.getResultList();
+		System.out.println("Hay actualmente "+artists.size()+" artistas en la base de datos");
+		artists.forEach(artist -> System.out.println(artist.getName()));
+		
+		em.close();
+	}
+	
+	
+	
 }

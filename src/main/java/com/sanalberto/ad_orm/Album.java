@@ -52,8 +52,13 @@ public class Album implements java.io.Serializable {
 		this.albumId = albumId;
 	}
 
+	/*
+	 * Relación varios a uno. 
+	 * @JoinColumn Indica quién es el "dueño" de la relación (en esta suele ser el lado 1)
+	 * FetchType.LAZY es para ahorrar recursos, cargará los datos cuando se necesiten
+	 * */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ArtistId", nullable = false)
+	@JoinColumn(name = "ArtistId", nullable = false) 
 	public Artist getArtist() {
 		return this.artist;
 	}
@@ -71,6 +76,7 @@ public class Album implements java.io.Serializable {
 		this.title = title;
 	}
 
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "album")
 	public Set<Track> getTracks() {
 		return this.tracks;

@@ -52,6 +52,9 @@ public class Artist implements java.io.Serializable {
 		this.name = name;
 	}
 
+	/*
+	 * Está hecho con un set, pero podría ser una List u otro
+	 * */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "artist")
 	public Set<Album> getAlbums() {
 		return this.albums;

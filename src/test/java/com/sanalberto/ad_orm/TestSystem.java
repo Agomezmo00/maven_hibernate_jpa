@@ -1,5 +1,6 @@
 package com.sanalberto.ad_orm;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -23,19 +24,22 @@ public class TestSystem {
 		//addCustomer("Antonio", "Gomez", "agomez@iessanalberto.com");
 		//addCustomer("Juan", "Lopez", "jlopez@iessanalberto.com");
 		//addCustomer("Agustin", "Perez", "aperez@iessanalberto.com");
-		getCustomer(1);
-		getCustomer(60);
+		//getCustomer(1);
+		//getCustomer(60);
 		//getCustomers();
 		//changeFirstName(3, "Aran");
 		
-		getArtist(150);
+		//getArtist(150);
 		//getAllArtists();
 		
+		
+		//getAlbumTracks(240);
+		getPlaylistTracks(3);
 		ENTITY_MANAGER_FACTORY.close();
 		
 	}
 	
-	
+
 	public static void addCustomer(String firstName, String lastName, String email) {
 		
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
@@ -61,7 +65,6 @@ public class TestSystem {
 		
 	}
 	
-	
 	public static void getCustomer(int id) {
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 		
@@ -82,7 +85,6 @@ public class TestSystem {
 			em.close();
 		}
 	}
-	
 	
 	public static void getCustomers() {
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
@@ -105,8 +107,7 @@ public class TestSystem {
 		
 	}
 	
-	
-	public static void changeFirstName(int id, String firstName) {
+	public static void changeCustomerFirstName(int id, String firstName) {
 		
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 		EntityTransaction et = null;
@@ -129,7 +130,6 @@ public class TestSystem {
 		}
 		
 	}
-	
 	
 	public static void deleteCustomer(int id) {
 		
@@ -155,16 +155,42 @@ public class TestSystem {
 		
 	}
 	
+	public static void deleteAlbum(int id) {
+		
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		Album alb = null;
+		
+		try {
+			et = em.getTransaction();
+			et.begin();
+			alb = em.find(Album.class, id);
+			em.remove(alb);
+			em.persist(alb);
+			et.commit();
+			System.out.println("Se ha eliminado el álbum");
+		} catch(Exception ex) {
+			if(et != null) {
+				System.out.println("Problemas al eliminar el álbum");
+				et.rollback();
+			}
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+	}
 	
-	public static void getArtist(int id) {
+	
+	public static Artist getArtist(int id) {
 		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
 		
 		Artist a = em.find(Artist.class, id);
 		
 		System.out.println(a.getName());
-		getArtistAlbums(a);
+		//getArtistAlbums(a);
 		
 		em.close();
+		return a;
 	}
 	
 	public static void getArtistAlbums(Artist art) {
@@ -188,7 +214,114 @@ public class TestSystem {
 		
 		em.close();
 	}
+
+	public static void addArtist(String artist) {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
+		et = em.getTransaction();
+		et.begin();
+		Artist art = new Artist();
+		art.setName(artist);
+		em.persist(art);
+		
+		
+	}
 	
+	public static void addAlbum(Artist art, String title) {
+		
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
+		try {
+			et = em.getTransaction();
+			et.begin();
+			Album alb1 = new Album();
+			alb1.setArtist(art);
+			alb1.setTitle(title);
+			em.persist(alb1);
+			et.commit();
+			System.out.println("El álbum: "+title +" se ha añadido a la BD");
+		} catch(Exception ex) {
+			et.rollback();
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+		
+		
+		
+	}
+	
+	public static Album getAlbum(int id) {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		Album alb = em.find(Album.class, id);
+		em.close();
+		return alb;
+	}
+	
+	public static void addTrackToAlbum(Album alb, String title, int mediatype, int genre, String composer) {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
+		try {
+			MediaType med = em.find(MediaType.class, mediatype);
+			Genre gen = em.find(Genre.class, genre);
+				
+			et = em.getTransaction();
+			et.begin();
+			
+			Track t = new Track();
+			t.setName(title);
+			t.setAlbum(alb);
+			t.setGenre(gen);
+			t.setMediaType(med);
+			
+			int duracion = (int) (Math.random() * (600000 - 60000)+60000);
+			t.setMilliseconds(duracion);
+			
+			t.setComposer(composer);
+			BigDecimal bd = new BigDecimal(0.99);
+			t.setUnitPrice(bd);
+			
+			int bytes = (int) (Math.random()* (10000 - 5000)+5000);
+			t.setBytes(bytes);
+			
+			em.persist(t);
+			et.commit();
+			System.out.println(title +" se ha insertado en la BD");
+		} catch (Exception ex) {
+			et.rollback();
+			ex.printStackTrace();
+		} finally {
+			em.close();
+		}
+	}
+	
+	public static void getAlbumTracks(int id) {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		Album a = em.find(Album.class, id);
+		
+		Set<Track> tracks = a.getTracks();
+		System.out.println(a.getTitle());
+		System.out.println("Hay "+ tracks.size() +" Canciones del álbum: ");
+		tracks.forEach(track -> System.out.println(track.getName()));
+		em.close();	
+	}
+	
+	public static void getPlaylistTracks(int id) {
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		Playlist p = em.find(Playlist.class, id);
+		
+		Set<Track> tracks = p.getTracks();
+		
+		System.out.println("Hay "+ tracks.size() +" canciones de la playlist: ");
+		tracks.forEach(track -> System.out.println(track.getName()));
+	}
+
+
+
+		
 	
 	
 }
